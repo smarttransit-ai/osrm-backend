@@ -3,6 +3,8 @@
 FROM debian:buster-slim as builder
 ARG DOCKER_TAG
 ARG BUILD_CONCURRENCY
+ARG OSRM_PROFILE
+RUN echo ${OSRM_PROFILE}
 RUN apt-get update && apt-get -y --no-install-recommends install cmake make git gcc g++ libbz2-dev libxml2-dev
 RUN mkdir -p /src  && mkdir -p /opt
 COPY tn/tennessee-latest.osm.pbf /tn/tennessee-latest.osm.pbf
@@ -31,7 +33,9 @@ RUN NPROC=${BUILD_CONCURRENCY:-$(grep -c ^processor /proc/cpuinfo 2>/dev/null ||
     strip /usr/local/bin/* && \
     rm -rf /src /usr/local/lib/libosrm*
 
-RUN /usr/local/bin/osrm-extract -p /opt/car.lua /tn/tennessee-latest.osm.pbf
+RUN echo "starting osrm extract"
+COPY profiles/${OSRM_PROFILE} /opt/${OSRM_PROFILE}
+RUN /usr/local/bin/osrm-extract -p /opt/${OSRM_PROFILE} /tn/tennessee-latest.osm.pbf
 RUN /usr/local/bin/osrm-partition  /tn/tennessee-latest.osrm
 RUN /usr/local/bin/osrm-customize  /tn/tennessee-latest.osrm
 
@@ -53,6 +57,14 @@ RUN apt-get update && \
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /opt /opt
 COPY --from=builder /tn /tn
+#RUN add-apt-repository ppa:ubuntugis/ppa
+RUN apt-get update
+RUN apt-get install -y build-essential
+RUN apt-get install -y python3-dev
+RUN apt-get install -y gdal-bin
+RUN apt-get install -y libgdal-dev
+RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal
+RUN export C_INCLUDE_PATH=/usr/include/gdal
 COPY requirements.txt /requirements.txt
 RUN set -ex && pip install -r /requirements.txt
 RUN /usr/local/bin/osrm-extract --help && \

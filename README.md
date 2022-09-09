@@ -38,9 +38,13 @@ rm us-south-latest.osm.pbf
 
 # Step 3: Build an image and push to docker hub
 
+Link to changing traffic profiles: `https://github.com/Project-OSRM/osrm-backend/blob/master/docs/profiles.md`
+
+If you add a new traffic profile to profiles/, change the `OSRM_PROFILE` parameter in .env. 
+
 ```bash
-# TAG can be something like tennessee-extended-20220506
-docker build -f docker/smarttransitDockerfile -t mpwilbur/smarttransit-osrm-server:<TAG> . 
+source .env
+docker build . -t mpwilbur/smarttransit-osrm-server:$OSRM_TAG -f docker/smarttransitDockerfile --build-arg BUILD_CONCURRENCY=1 --build-arg OSRM_PROFILE=$OSRM_PROFILE --platform linux/amd64
 
 # push to docker hub
 # Easiest way is to find the image in docker desktop and push from there
@@ -50,8 +54,9 @@ docker build -f docker/smarttransitDockerfile -t mpwilbur/smarttransit-osrm-serv
 # Step 4: Pull and Run
 
 ```bash
-docker pull mpwilbur/smarttransit-osrm-server:<TAG>
-docker run -m=12g -p 8080:5000 -d --restart unless-stopped mpwilbur/smarttransit-osrm-server:<TAG>
+docker pull mpwilbur/smarttransit-osrm-server:$OSRM_TAG
+docker run -m=12g -p 8080:5000 -d --restart unless-stopped mpwilbur/smarttransit-osrm-server:$OSRM_TAG
+docker run -p 8080:5000 -d --restart unless-stopped mpwilbur/smarttransit-osrm-server:$OSRM_TAG
 ```
 
 After that we will have a docker container exposed on port 8080.
@@ -60,6 +65,6 @@ After that we will have a docker container exposed on port 8080.
 
 ```bash
 # <remote-server> is the url/IP of the server you are running the OSRM instance (step 4)
-curl "http://<remote-server>:8080/route/v1/driving/-86.79426670074463,36.12473806954196;-86.7641830444336,36.13808266878191"
-curl "http://<remote-server>:8080/table/v1/driving/-86.79426670074463,36.12473806954196;-86.7641830444336,36.13808266878191"
+curl "http://localhost:8080/route/v1/driving/-86.79426670074463,36.12473806954196;-86.7641830444336,36.13808266878191"
+curl "http://localhost:8080/table/v1/driving/-86.79426670074463,36.12473806954196;-86.7641830444336,36.13808266878191"
 ```
