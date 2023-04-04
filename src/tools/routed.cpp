@@ -134,16 +134,16 @@ inline unsigned generateServerProgramOptions(const int argc,
          value<int>(&config.max_locations_viaroute)->default_value(500),
          "Max. locations supported in viaroute query") //
         ("max-trip-size",
-         value<int>(&config.max_locations_trip)->default_value(10000),
+         value<int>(&config.max_locations_trip)->default_value(20000),
          "Max. locations supported in trip query") //
         ("max-table-size",
-         value<int>(&config.max_locations_distance_table)->default_value(10000),
+         value<int>(&config.max_locations_distance_table)->default_value(20000),
          "Max. locations supported in distance table query") //
         ("max-matching-size",
-         value<int>(&config.max_locations_map_matching)->default_value(10000),
+         value<int>(&config.max_locations_map_matching)->default_value(20000),
          "Max. locations supported in map matching query") //
         ("max-nearest-size",
-         value<int>(&config.max_results_nearest)->default_value(10000),
+         value<int>(&config.max_results_nearest)->default_value(20000),
          "Max. results supported in nearest query") //
         ("max-alternatives",
          value<int>(&config.max_alternatives)->default_value(3),
